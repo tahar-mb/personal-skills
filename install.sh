@@ -10,7 +10,7 @@
 # ============================================================
 set -euo pipefail
 
-REPO_URL="${1:-https://github.com/taharbalkheir/personal-skills}"
+REPO_URL="${1:-https://github.com/tahar-mb/personal-skills}"
 SKILLS_DIR="$HOME/.claude/skills"
 TMP_DIR=$(mktemp -d)
 

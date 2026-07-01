@@ -7,7 +7,7 @@ A collection of custom Claude Code skills (slash commands).
 ### Method 1: One-liner (no clone)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/taharbalkheir/personal-skills/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash
 ```
 
 Downloads and installs directly — no clone needed.
@@ -15,7 +15,7 @@ Downloads and installs directly — no clone needed.
 ### Method 2: Clone + install
 
 ```bash
-git clone https://github.com/taharbalkheir/personal-skills
+git clone https://github.com/tahar-mb/personal-skills
 cd personal-skills
 ./install
 ```
@@ -23,7 +23,7 @@ cd personal-skills
 ### Method 3: Plugin marketplace (from within Claude Code)
 
 ```
-/plugin marketplace add taharbalkheir/personal-skills
+/plugin marketplace add tahar-mb/personal-skills
 /plugin install personal-skills@personal-skills
 ```
 
