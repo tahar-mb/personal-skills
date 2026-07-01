@@ -11,8 +11,8 @@ A collection of custom skills compatible with **Claude Code**, **Hermes**, and *
 curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash
 
 # Or to a specific tool
-curl -fsSL ...install.sh | bash -s -- --cursor
-curl -fsSL ...install.sh | bash -s -- --hermes
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --cursor
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --hermes
 ```
 
 ### Clone + install
