@@ -1,14 +1,50 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")"
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILLS_DIR="$HOME/.claude/skills"
 
-echo "Installing personal Claude Code skills..."
-echo ""
+install_skill() {
+  local name="$1"
+  local src="$REPO_DIR/$name"
+  local dst="$SKILLS_DIR/$name"
 
-if [ ! -d "$HOME/.claude/skills" ]; then
-  mkdir -p "$HOME/.claude/skills"
-  echo "Created $HOME/.claude/skills/"
+  if [ ! -d "$src" ] && [ ! -f "$src" ]; then
+    echo "Error: skill '$name' not found in $REPO_DIR" >&2
+    exit 1
+  fi
+
+  # Warn if destination exists and wasn't installed from here
+  if [ -e "$dst" ] && [ ! -f "$dst/.installed-from" ]; then
+    echo "Warning: $dst already exists, skipping" >&2
+    return
+  fi
+
+  rm -rf "$dst"
+  cp -R "$src" "$dst"
+  echo "$REPO_DIR" > "$dst/.installed-from"
+  echo "Installed $name"
+}
+
+mkdir -p "$SKILLS_DIR"
+
+if [ $# -eq 0 ]; then
+  echo "Installing all skills..."
+  for dir in "$REPO_DIR"/*/; do
+    [ -d "$dir" ] || continue
+    name="$(basename "$dir")"
+    # Skip internal directories
+    case "$name" in
+      bin|.git) continue ;;
+    esac
+    install_skill "$name"
+  done
+else
+  for name in "$@"; do
+    install_skill "$name"
+  done
 fi
 
-exec ./bin/link "$@"
+echo ""
+echo "Done. Skills are available at $SKILLS_DIR"
+echo "Restart Claude Code or start a new session to use them."

@@ -1,40 +1,37 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SKILLS_DIR="$HOME/.claude/skills"
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+SKILLS_DIR="$HOME/.claude/skills"
+
+uninstall_skill() {
+  local name="$1"
+  local dst="$SKILLS_DIR/$name"
+  local marker="$dst/.installed-from"
+
+  if [ ! -e "$dst" ]; then
+    echo "Warning: $name is not installed, skipping" >&2
+    return
+  fi
+
+  if [ -f "$marker" ] && [ "$(cat "$marker")" = "$REPO_DIR" ]; then
+    rm -rf "$dst"
+    echo "Removed $name"
+  else
+    echo "Warning: $name was not installed from this repo, skipping" >&2
+  fi
+}
 
 if [ $# -eq 0 ]; then
-  echo "Uninstalling all skills from this repo..."
-  for dir in "$REPO_DIR"/*/; do
+  echo "Uninstalling all skills installed from this repo..."
+  for dir in "$SKILLS_DIR"/*/; do
+    [ -d "$dir" ] || continue
     name="$(basename "$dir")"
-    [ "$name" = "bin" ] && continue
-    dst="$SKILLS_DIR/$name"
-    if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$REPO_DIR/$name" ]; then
-      rm "$dst"
-      echo "Removed $name"
-    fi
-  done
-  for f in "$REPO_DIR"/*.md; do
-    [ -f "$f" ] || continue
-    name="$(basename "$f" .md)"
-    [ "$name" = "README" ] && continue
-    dst="$SKILLS_DIR/$name"
-    if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$REPO_DIR/$f" ]; then
-      rm "$dst"
-      echo "Removed $name"
-    fi
+    uninstall_skill "$name"
   done
 else
   for name in "$@"; do
-    dst="$SKILLS_DIR/$name"
-    src="$REPO_DIR/$name"
-    if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
-      rm "$dst"
-      echo "Removed $name"
-    else
-      echo "Warning: $name is not installed from this repo, skipping" >&2
-    fi
+    uninstall_skill "$name"
   done
 fi
 

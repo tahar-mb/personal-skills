@@ -10,7 +10,7 @@ cd personal-skills
 ./install
 ```
 
-This symlinks all skills into `~/.claude/skills/` so they're available as `/` commands in Claude Code.
+This copies all skills into `~/.claude/skills/`. Restart Claude Code or start a new session, then use `/skill-name` to invoke a skill.
 
 ### Install a single skill
 
@@ -21,7 +21,7 @@ This symlinks all skills into `~/.claude/skills/` so they're available as `/` co
 ### Uninstall
 
 ```bash
-./uninstall          # remove all skills from this repo
+./uninstall          # remove all skills installed from this repo
 ./uninstall <name>   # remove a specific skill
 ```
 
@@ -29,11 +29,10 @@ This symlinks all skills into `~/.claude/skills/` so they're available as `/` co
 
 ```
 personal-skills/
-  install            # install entry point
-  uninstall          # remove symlinks
-  bin/link           # symlink engine (called by install)
+  install            # installs skills into ~/.claude/skills/
+  uninstall          # removes installed skills
   <skill-name>/
-    SKILL.md         # skill definition
+    SKILL.md         # skill definition (required)
     ...              # optional supporting files
 ```
 
