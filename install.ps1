@@ -31,13 +31,20 @@ if ($ValidTargets.Count -eq 0) {
   exit 1
 }
 
-$TmpDir = "$env:TEMP\personal-skills-$([System.IO.Path]::GetRandomFileName())"
+# Derive archive URL from repo URL
+if ($RepoUrl -match 'github\.com/([^/]+)/([^/]+)') {
+  $ArchiveUrl = "https://github.com/$($matches[1])/$($matches[2].Replace('.git',''))/archive/main.zip"
+} else {
+  Write-Host "Error: only GitHub URLs are supported" -ForegroundColor Red
+  exit 1
+}
+
+$TmpDir = Join-Path ([System.IO.Path]::GetTempPath()) "personal-skills-$([System.IO.Path]::GetRandomFileName())"
 New-Item -ItemType Directory -Path $TmpDir -Force | Out-Null
 
 try {
   Write-Host "Downloading skills from $RepoUrl ..."
   $ArchivePath = "$TmpDir\archive.zip"
-  $ArchiveUrl = "https://github.com/tahar-mb/personal-skills/archive/main.zip"
   Invoke-WebRequest -Uri $ArchiveUrl -OutFile $ArchivePath -UseBasicParsing
 
   Expand-Archive -Path $ArchivePath -DestinationPath $TmpDir -Force
@@ -52,7 +59,14 @@ try {
     param([string]$Name, [string]$Src, [string]$Dst, [string]$Label)
     $ParentDir = Split-Path $Dst -Parent
     New-Item -ItemType Directory -Path $ParentDir -Force | Out-Null
-    if (Test-Path $Dst) { Remove-Item -Recurse -Force $Dst }
+    if (Test-Path $Dst) {
+      $Marker = Join-Path $Dst ".installed-from"
+      if (-not (Test-Path $Marker)) {
+        Write-Host "  [$Label] Warning: $Dst already exists, skipping" -ForegroundColor Yellow
+        return
+      }
+      Remove-Item -Recurse -Force $Dst
+    }
     Copy-Item -Recurse -Path $Src -Destination $Dst
     "$RepoUrl" | Out-File -FilePath "$Dst\.installed-from" -Encoding ASCII
     Write-Host "  [$Label] Installed $Name"

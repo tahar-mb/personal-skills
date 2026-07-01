@@ -2,15 +2,34 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-SKILLS_DIR="$HOME/.claude/skills"
+
+target_dir() {
+  case "$1" in
+    claude) echo "$HOME/.claude/skills" ;;
+    hermes) echo "$HOME/.hermes/skills" ;;
+    cursor) echo "$HOME/.cursor/skills" ;;
+  esac
+}
+
+ACTIVE_TARGETS=()
+ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --claude|--hermes|--cursor) ACTIVE_TARGETS+=("${arg#--}") ;;
+    *) ARGS+=("$arg") ;;
+  esac
+done
+
+if [ ${#ACTIVE_TARGETS[@]} -eq 0 ]; then
+  ACTIVE_TARGETS=(claude hermes cursor)
+fi
 
 uninstall_skill() {
-  local name="$1"
-  local dst="$SKILLS_DIR/$name"
+  local name="$1" dst="$2"
   local marker="$dst/.installed-from"
 
   if [ ! -e "$dst" ]; then
-    echo "Warning: $name is not installed, skipping" >&2
+    echo "  Warning: $name is not installed, skipping" >&2
     return
   fi
 
@@ -18,22 +37,26 @@ uninstall_skill() {
     rm -rf "$dst"
     echo "  Removed $name"
   else
-    echo "Warning: $name was not installed from this repo, skipping" >&2
+    echo "  Warning: $name was not installed from this repo, skipping" >&2
   fi
 }
 
-if [ $# -eq 0 ]; then
-  echo "Uninstalling skills installed from this repo..."
-  for dir in "$SKILLS_DIR"/*/; do
-    [ -d "$dir" ] || continue
-    name="$(basename "$dir")"
-    uninstall_skill "$name"
-  done
-else
-  for name in "$@"; do
-    uninstall_skill "$name"
-  done
-fi
+for target in "${ACTIVE_TARGETS[@]}"; do
+  skills_dir="$(target_dir "$target")"
+  echo "Uninstalling from $skills_dir ..."
+
+  if [ ${#ARGS[@]} -eq 0 ]; then
+    for dir in "$skills_dir"/*/; do
+      [ -d "$dir" ] || continue
+      name="$(basename "$dir")"
+      uninstall_skill "$name" "$dir"
+    done
+  else
+    for name in "${ARGS[@]}"; do
+      uninstall_skill "$name" "$skills_dir/$name"
+    done
+  fi
+done
 
 echo ""
 echo "Done."

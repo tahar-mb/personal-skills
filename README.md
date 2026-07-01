@@ -4,16 +4,10 @@ A collection of custom skills compatible with **Claude Code**, **Hermes**, and *
 
 ## Quick Install
 
-### macOS
+### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-macos.sh | bash
-```
-
-### Linux
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-linux.sh | bash
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash
 ```
 
 ### Windows (PowerShell 5+)
@@ -25,9 +19,8 @@ iwr -useb https://raw.githubusercontent.com/tahar-mb/personal-skills/main/instal
 ### Install for a specific tool
 
 ```bash
-# macOS / Linux (replace script name as needed)
-curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-macos.sh | bash -s -- --cursor
-curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-linux.sh | bash -s -- --hermes
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --cursor
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --hermes
 
 # Windows
 .\install.ps1 -Target cursor
@@ -53,7 +46,9 @@ cd personal-skills
 ### Uninstall
 
 ```bash
-./uninstall
+./uninstall              # all targets
+./uninstall --cursor     # specific target
+./uninstall --claude skill-audit  # specific skill on specific target
 ```
 
 ## Targets
@@ -70,9 +65,8 @@ Default (no flag) installs to all three.
 
 ```
 personal-skills/
-  install              # local install (any OS)
-  install-macos.sh     # macOS remote one-liner
-  install-linux.sh     # Linux remote one-liner
+  install              # local install (clone first)
+  install.sh           # remote install (pipe from curl)
   install.ps1          # Windows PowerShell installer
   uninstall            # remove installed skills
   .claude-plugin/      # Claude Code plugin marketplace

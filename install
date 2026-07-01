@@ -12,7 +12,6 @@ target_dir() {
   esac
 }
 
-TARGET_ORDER=("claude" "hermes" "cursor")
 ACTIVE_TARGETS=()
 
 usage() {
@@ -28,7 +27,6 @@ usage() {
   exit 0
 }
 
-# Parse flags
 SKIP_FLAGS=false
 ARGS=()
 for arg in "$@"; do
@@ -43,28 +41,17 @@ for arg in "$@"; do
   esac
 done
 
-# Default: all targets
 if [ ${#ACTIVE_TARGETS[@]} -eq 0 ]; then
-  ACTIVE_TARGETS=("${TARGET_ORDER[@]}")
+  ACTIVE_TARGETS=(claude hermes cursor)
 fi
 
 install_skill_to() {
-  local name="$1"
-  local src="$2"
-  local dst="$3"
-  local label="$4"
-
-  if [ ! -d "$src" ] && [ ! -f "$src" ]; then
-    return 1
-  fi
-
+  local name="$1" src="$2" dst="$3" label="$4"
   mkdir -p "$(dirname "$dst")"
-
   if [ -e "$dst" ] && [ ! -f "$dst/.installed-from" ]; then
     echo "  [$label] Warning: $dst already exists, skipping" >&2
     return 0
   fi
-
   rm -rf "$dst"
   cp -R "$src" "$dst"
   echo "$REPO_DIR" > "$dst/.installed-from"
