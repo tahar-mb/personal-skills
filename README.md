@@ -19,12 +19,19 @@ iwr -useb https://raw.githubusercontent.com/tahar-mb/personal-skills/main/instal
 ### Install for a specific tool
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --cursor
+# Claude Code
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --claude
+
+# Hermes
 curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --hermes
 
+# Cursor
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --cursor
+
 # Windows
+.\install.ps1 -Target claude
+.\install.ps1 -Target hermes
 .\install.ps1 -Target cursor
-.\install.ps1 -Target claude,hermes
 ```
 
 ### Clone + install (any OS)
@@ -33,7 +40,9 @@ curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/insta
 git clone https://github.com/tahar-mb/personal-skills
 cd personal-skills
 ./install              # all tools
-./install --cursor     # specific tool
+./install --claude     # Claude Code only
+./install --hermes     # Hermes only
+./install --cursor     # Cursor only
 ```
 
 ### Plugin marketplace (Claude Code only)
