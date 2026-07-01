@@ -30,10 +30,13 @@ if [ ${#TARGET_FLAGS[@]} -eq 0 ]; then
   TARGET_FLAGS=("claude" "hermes" "cursor")
 fi
 
-declare -A TARGET_DIRS
-TARGET_DIRS["claude"]="$HOME/.claude/skills"
-TARGET_DIRS["hermes"]="$HOME/.hermes/skills"
-TARGET_DIRS["cursor"]="$HOME/.cursor/skills"
+target_dir() {
+  case "$1" in
+    claude) echo "$HOME/.claude/skills" ;;
+    hermes) echo "$HOME/.hermes/skills" ;;
+    cursor) echo "$HOME/.cursor/skills" ;;
+  esac
+}
 
 TMP_DIR=$(mktemp -d)
 cleanup() { rm -rf "$TMP_DIR"; }
@@ -69,8 +72,7 @@ install_skill_to() {
 }
 
 for target in "${TARGET_FLAGS[@]}"; do
-  dest="${TARGET_DIRS[$target]:-}"
-  [ -n "$dest" ] || continue
+  dest="$(target_dir "$target")"
   echo "Installing to $dest ..."
 
   installed=0

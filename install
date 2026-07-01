@@ -4,11 +4,13 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILL_SOURCES=("$REPO_DIR/skills" "$REPO_DIR")
 
-# Target definitions: --flag → dest dir → label
-declare -A TARGETS
-TARGETS["claude"]="$HOME/.claude/skills"
-TARGETS["hermes"]="$HOME/.hermes/skills"
-TARGETS["cursor"]="$HOME/.cursor/skills"
+target_dir() {
+  case "$1" in
+    claude) echo "$HOME/.claude/skills" ;;
+    hermes) echo "$HOME/.hermes/skills" ;;
+    cursor) echo "$HOME/.cursor/skills" ;;
+  esac
+}
 
 TARGET_ORDER=("claude" "hermes" "cursor")
 ACTIVE_TARGETS=()
@@ -80,11 +82,10 @@ find_skill_src() {
 
 install_to_target() {
   local target="$1"
-  local dest="${TARGETS[$target]}"
+  local dest="$(target_dir "$target")"
   echo "  Target: $dest"
 
   if [ ${#ARGS[@]} -eq 0 ]; then
-    # Install all skills
     for base in "${SKILL_SOURCES[@]}"; do
       [ -d "$base" ] || continue
       for dir in "$base"/*/; do
@@ -99,7 +100,6 @@ install_to_target() {
       done
     done
   else
-    # Install specific skills
     for name in "${ARGS[@]}"; do
       src="$(find_skill_src "$name")"
       if [ -z "$src" ]; then
