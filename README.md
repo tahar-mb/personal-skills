@@ -25,9 +25,9 @@ iwr -useb https://raw.githubusercontent.com/tahar-mb/personal-skills/main/instal
 ### Install for a specific tool
 
 ```bash
-# macOS / Linux
-curl -fsSL ...install-macos.sh | bash -s -- --cursor
-curl -fsSL ...install-linux.sh | bash -s -- --hermes
+# macOS / Linux (replace script name as needed)
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-macos.sh | bash -s -- --cursor
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-linux.sh | bash -s -- --hermes
 
 # Windows
 .\install.ps1 -Target cursor

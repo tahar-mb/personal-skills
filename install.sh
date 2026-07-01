@@ -6,10 +6,10 @@
 #   curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash
 #
 # With target flags:
-#   curl -fsSL ...install.sh | bash -s -- --cursor
+#   curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --cursor
 #
 # Custom repo:
-#   curl -fsSL ...install.sh | bash -s -- https://github.com/user/repo
+#   curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- https://github.com/user/repo
 # ============================================================
 set -euo pipefail
 

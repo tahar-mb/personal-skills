@@ -6,7 +6,7 @@
 #   curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-macos.sh | bash
 #
 # With target:
-#   curl -fsSL .../install-macos.sh | bash -s -- --cursor
+#   curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-macos.sh | bash -s -- --cursor
 # ============================================================
 set -euo pipefail
 
