@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+echo "Installing personal Claude Code skills..."
+echo ""
+
+if [ ! -d "$HOME/.claude/skills" ]; then
+  mkdir -p "$HOME/.claude/skills"
+  echo "Created $HOME/.claude/skills/"
+fi
+
+exec ./bin/link "$@"
