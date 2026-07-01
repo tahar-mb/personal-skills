@@ -4,25 +4,43 @@ A collection of custom skills compatible with **Claude Code**, **Hermes**, and *
 
 ## Quick Install
 
-### One-liner (no clone)
+### macOS
 
 ```bash
-# Install to all supported tools
-curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash
-
-# Or to a specific tool
-curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --cursor
-curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash -s -- --hermes
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-macos.sh | bash
 ```
 
-### Clone + install
+### Linux
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-linux.sh | bash
+```
+
+### Windows (PowerShell 5+)
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.ps1 | iex
+```
+
+### Install for a specific tool
+
+```bash
+# macOS / Linux
+curl -fsSL ...install-macos.sh | bash -s -- --cursor
+curl -fsSL ...install-linux.sh | bash -s -- --hermes
+
+# Windows
+.\install.ps1 -Target cursor
+.\install.ps1 -Target claude,hermes
+```
+
+### Clone + install (any OS)
 
 ```bash
 git clone https://github.com/tahar-mb/personal-skills
 cd personal-skills
 ./install              # all tools
-./install --cursor      # cursor only
-./install --claude --hermes  # specific tools
+./install --cursor     # specific tool
 ```
 
 ### Plugin marketplace (Claude Code only)
@@ -30,12 +48,6 @@ cd personal-skills
 ```
 /plugin marketplace add tahar-mb/personal-skills
 /plugin install personal-skills@personal-skills
-```
-
-### Install a single skill
-
-```bash
-./install --claude skill-audit
 ```
 
 ### Uninstall
@@ -46,11 +58,11 @@ cd personal-skills
 
 ## Targets
 
-| Flag | Tool | Install path |
-|------|------|-------------|
-| `--claude` | Claude Code | `~/.claude/skills/` |
-| `--hermes` | Hermes Agent | `~/.hermes/skills/` |
-| `--cursor` | Cursor | `~/.cursor/skills/` |
+| Flag | Tool | macOS / Linux | Windows |
+|------|------|---------------|---------|
+| `--claude` | Claude Code | `~/.claude/skills/` | `%USERPROFILE%\.claude\skills\` |
+| `--hermes` | Hermes Agent | `~/.hermes/skills/` | `%USERPROFILE%\.hermes\skills\` |
+| `--cursor` | Cursor | `~/.cursor/skills/` | `%USERPROFILE%\.cursor\skills\` |
 
 Default (no flag) installs to all three.
 
@@ -58,13 +70,15 @@ Default (no flag) installs to all three.
 
 ```
 personal-skills/
-  install            # local install
-  install.sh         # remote install (pipe from curl)
-  uninstall          # remove installed skills
-  .claude-plugin/    # Claude Code plugin marketplace
+  install              # local install (any OS)
+  install-macos.sh     # macOS remote one-liner
+  install-linux.sh     # Linux remote one-liner
+  install.ps1          # Windows PowerShell installer
+  uninstall            # remove installed skills
+  .claude-plugin/      # Claude Code plugin marketplace
   skills/
     <name>/
-      SKILL.md       # skill definition
+      SKILL.md         # skill definition
 ```
 
 ## Skills
