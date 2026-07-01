@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SKILLS_DIR="$HOME/.claude/skills"
+REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+link_skill() {
+  local name="$1"
+  local src="$REPO_DIR/$name"
+  local dst="$SKILLS_DIR/$name"
+
+  if [ ! -d "$src" ] && [ ! -f "$src" ]; then
+    echo "Error: skill '$name' not found in $REPO_DIR" >&2
+    exit 1
+  fi
+
+  # Remove existing if it's a symlink (preserve real files)
+  if [ -L "$dst" ]; then
+    rm "$dst"
+  elif [ -e "$dst" ]; then
+    echo "Warning: $dst exists and is not a symlink, skipping" >&2
+    return
+  fi
+
+  ln -s "$src" "$dst"
+  echo "Linked $name"
+}
+
+mkdir -p "$SKILLS_DIR"
+
+if [ $# -eq 0 ]; then
+  for dir in "$REPO_DIR"/*/; do
+    name="$(basename "$dir")"
+    [ "$name" = "bin" ] && continue
+    link_skill "$name"
+  done
+  # Also link standalone .md files at root
+  for f in "$REPO_DIR"/*.md; do
+    [ -f "$f" ] || continue
+    name="$(basename "$f" .md)"
+    [ "$name" = "README" ] && continue
+    link_skill "$name"
+  done
+else
+  for name in "$@"; do
+    link_skill "$name"
+  done
+fi

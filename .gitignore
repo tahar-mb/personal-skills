@@ -1,0 +1,5 @@
+# Ignore editor temp files
+*.swp
+*.swo
+*~
+.DS_Store
