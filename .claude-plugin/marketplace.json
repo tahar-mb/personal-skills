@@ -1,0 +1,13 @@
+{
+  "name": "personal-skills",
+  "description": "Personal Claude Code skills collection",
+  "plugins": [
+    {
+      "name": "personal-skills",
+      "source": {
+        "source": "github",
+        "repo": "taharbalkheir/personal-skills"
+      }
+    }
+  ]
+}

@@ -3,48 +3,58 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_DIR="$HOME/.claude/skills"
+SKILL_SOURCES=("$REPO_DIR/skills" "$REPO_DIR")
 
 install_skill() {
   local name="$1"
-  local src="$REPO_DIR/$name"
+  local src="$2"
   local dst="$SKILLS_DIR/$name"
 
   if [ ! -d "$src" ] && [ ! -f "$src" ]; then
-    echo "Error: skill '$name' not found in $REPO_DIR" >&2
-    exit 1
+    return 1
   fi
 
-  # Warn if destination exists and wasn't installed from here
   if [ -e "$dst" ] && [ ! -f "$dst/.installed-from" ]; then
     echo "Warning: $dst already exists, skipping" >&2
-    return
+    return 0
   fi
 
   rm -rf "$dst"
   cp -R "$src" "$dst"
   echo "$REPO_DIR" > "$dst/.installed-from"
-  echo "Installed $name"
+  echo "  Installed $name"
 }
 
 mkdir -p "$SKILLS_DIR"
 
 if [ $# -eq 0 ]; then
-  echo "Installing all skills..."
-  for dir in "$REPO_DIR"/*/; do
-    [ -d "$dir" ] || continue
-    name="$(basename "$dir")"
-    # Skip internal directories
-    case "$name" in
-      bin|.git) continue ;;
-    esac
-    install_skill "$name"
+  echo "Installing skills..."
+  for base in "${SKILL_SOURCES[@]}"; do
+    [ -d "$base" ] || continue
+    for dir in "$base"/*/; do
+      [ -d "$dir" ] || continue
+      name="$(basename "$dir")"
+      case "$name" in
+        bin|.git|.claude-plugin) continue ;;
+      esac
+      if [ -f "$dir/SKILL.md" ]; then
+        install_skill "$name" "$dir"
+      fi
+    done
   done
 else
   for name in "$@"; do
-    install_skill "$name"
+    # Try skills/ first, then root
+    if [ -d "$REPO_DIR/skills/$name" ]; then
+      install_skill "$name" "$REPO_DIR/skills/$name"
+    elif [ -d "$REPO_DIR/$name" ]; then
+      install_skill "$name" "$REPO_DIR/$name"
+    else
+      echo "Error: skill '$name' not found" >&2
+      exit 1
+    fi
   done
 fi
 
 echo ""
-echo "Done. Skills are available at $SKILLS_DIR"
-echo "Restart Claude Code or start a new session to use them."
+echo "Done. Restart Claude Code or start a new session to use them."

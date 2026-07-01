@@ -16,14 +16,14 @@ uninstall_skill() {
 
   if [ -f "$marker" ] && [ "$(cat "$marker")" = "$REPO_DIR" ]; then
     rm -rf "$dst"
-    echo "Removed $name"
+    echo "  Removed $name"
   else
     echo "Warning: $name was not installed from this repo, skipping" >&2
   fi
 }
 
 if [ $# -eq 0 ]; then
-  echo "Uninstalling all skills installed from this repo..."
+  echo "Uninstalling skills installed from this repo..."
   for dir in "$SKILLS_DIR"/*/; do
     [ -d "$dir" ] || continue
     name="$(basename "$dir")"

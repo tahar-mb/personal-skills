@@ -4,13 +4,30 @@ A collection of custom Claude Code skills (slash commands).
 
 ## Install
 
+### Method 1: One-liner (no clone)
+
 ```bash
-git clone <repo-url>
+curl -fsSL https://raw.githubusercontent.com/taharbalkheir/personal-skills/main/install.sh | bash
+```
+
+Downloads and installs directly — no clone needed.
+
+### Method 2: Clone + install
+
+```bash
+git clone https://github.com/taharbalkheir/personal-skills
 cd personal-skills
 ./install
 ```
 
-This copies all skills into `~/.claude/skills/`. Restart Claude Code or start a new session, then use `/skill-name` to invoke a skill.
+### Method 3: Plugin marketplace (from within Claude Code)
+
+```
+/plugin marketplace add taharbalkheir/personal-skills
+/plugin install personal-skills@personal-skills
+```
+
+Skills are namespaced — use `/personal-skills:skill-audit`.
 
 ### Install a single skill
 
@@ -29,11 +46,15 @@ This copies all skills into `~/.claude/skills/`. Restart Claude Code or start a 
 
 ```
 personal-skills/
-  install            # installs skills into ~/.claude/skills/
-  uninstall          # removes installed skills
-  <skill-name>/
-    SKILL.md         # skill definition (required)
-    ...              # optional supporting files
+  install            # local install (clone first)
+  install.sh         # remote install (pipe from curl)
+  uninstall          # remove installed skills
+  .claude-plugin/    # plugin marketplace support
+    plugin.json
+    marketplace.json
+  skills/
+    <skill-name>/
+      SKILL.md       # skill definition
 ```
 
 ## Skills
