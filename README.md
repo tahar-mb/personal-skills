@@ -1,59 +1,69 @@
 # Personal Claude Code Skills
 
-A collection of custom Claude Code skills (slash commands).
+A collection of custom skills compatible with **Claude Code**, **Hermes**, and **Cursor**.
 
-## Install
+## Quick Install
 
-### Method 1: One-liner (no clone)
+### One-liner (no clone)
 
 ```bash
+# Install to all supported tools
 curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash
+
+# Or to a specific tool
+curl -fsSL ...install.sh | bash -s -- --cursor
+curl -fsSL ...install.sh | bash -s -- --hermes
 ```
 
-Downloads and installs directly — no clone needed.
-
-### Method 2: Clone + install
+### Clone + install
 
 ```bash
 git clone https://github.com/tahar-mb/personal-skills
 cd personal-skills
-./install
+./install              # all tools
+./install --cursor      # cursor only
+./install --claude --hermes  # specific tools
 ```
 
-### Method 3: Plugin marketplace (from within Claude Code)
+### Plugin marketplace (Claude Code only)
 
 ```
 /plugin marketplace add tahar-mb/personal-skills
 /plugin install personal-skills@personal-skills
 ```
 
-Skills are namespaced — use `/personal-skills:skill-audit`.
-
 ### Install a single skill
 
 ```bash
-./install <skill-name>
+./install --claude skill-audit
 ```
 
 ### Uninstall
 
 ```bash
-./uninstall          # remove all skills installed from this repo
-./uninstall <name>   # remove a specific skill
+./uninstall
 ```
+
+## Targets
+
+| Flag | Tool | Install path |
+|------|------|-------------|
+| `--claude` | Claude Code | `~/.claude/skills/` |
+| `--hermes` | Hermes Agent | `~/.hermes/skills/` |
+| `--cursor` | Cursor | `~/.cursor/skills/` |
+
+Default (no flag) installs to all three.
 
 ## Structure
 
 ```
 personal-skills/
-  install            # local install (clone first)
+  install            # local install
   install.sh         # remote install (pipe from curl)
   uninstall          # remove installed skills
-  .claude-plugin/    # plugin marketplace support
-    plugin.json
-    marketplace.json
+  .claude-plugin/    # Claude Code plugin marketplace
   skills/
-    <skill-name>/
+    <name>/
       SKILL.md       # skill definition
 ```
 

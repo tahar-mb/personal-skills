@@ -2,59 +2,119 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-SKILLS_DIR="$HOME/.claude/skills"
 SKILL_SOURCES=("$REPO_DIR/skills" "$REPO_DIR")
 
-install_skill() {
+# Target definitions: --flag → dest dir → label
+declare -A TARGETS
+TARGETS["claude"]="$HOME/.claude/skills"
+TARGETS["hermes"]="$HOME/.hermes/skills"
+TARGETS["cursor"]="$HOME/.cursor/skills"
+
+TARGET_ORDER=("claude" "hermes" "cursor")
+ACTIVE_TARGETS=()
+
+usage() {
+  echo "Usage: ./install [--claude] [--hermes] [--cursor] [<skill-name> ...]"
+  echo ""
+  echo "Flags:"
+  echo "  --claude   Install to ~/.claude/skills/   (default: all)"
+  echo "  --hermes   Install to ~/.hermes/skills/  (default: all)"
+  echo "  --cursor   Install to ~/.cursor/skills/  (default: all)"
+  echo ""
+  echo "If no flag is given, installs to all targets."
+  echo "If skill names are given, only those skills are installed."
+  exit 0
+}
+
+# Parse flags
+SKIP_FLAGS=false
+ARGS=()
+for arg in "$@"; do
+  $SKIP_FLAGS && ARGS+=("$arg") && continue
+  case "$arg" in
+    --help|-h) usage ;;
+    --claude|--hermes|--cursor)
+      ACTIVE_TARGETS+=("${arg#--}")
+      ;;
+    --) SKIP_FLAGS=true ;;
+    *) ARGS+=("$arg") ;;
+  esac
+done
+
+# Default: all targets
+if [ ${#ACTIVE_TARGETS[@]} -eq 0 ]; then
+  ACTIVE_TARGETS=("${TARGET_ORDER[@]}")
+fi
+
+install_skill_to() {
   local name="$1"
   local src="$2"
-  local dst="$SKILLS_DIR/$name"
+  local dst="$3"
+  local label="$4"
 
   if [ ! -d "$src" ] && [ ! -f "$src" ]; then
     return 1
   fi
 
+  mkdir -p "$(dirname "$dst")"
+
   if [ -e "$dst" ] && [ ! -f "$dst/.installed-from" ]; then
-    echo "Warning: $dst already exists, skipping" >&2
+    echo "  [$label] Warning: $dst already exists, skipping" >&2
     return 0
   fi
 
   rm -rf "$dst"
   cp -R "$src" "$dst"
   echo "$REPO_DIR" > "$dst/.installed-from"
-  echo "  Installed $name"
+  echo "  [$label] Installed $name"
 }
 
-mkdir -p "$SKILLS_DIR"
+find_skill_src() {
+  local name="$1"
+  if [ -d "$REPO_DIR/skills/$name" ]; then
+    echo "$REPO_DIR/skills/$name"
+  elif [ -d "$REPO_DIR/$name" ]; then
+    echo "$REPO_DIR/$name"
+  fi
+}
 
-if [ $# -eq 0 ]; then
-  echo "Installing skills..."
-  for base in "${SKILL_SOURCES[@]}"; do
-    [ -d "$base" ] || continue
-    for dir in "$base"/*/; do
-      [ -d "$dir" ] || continue
-      name="$(basename "$dir")"
-      case "$name" in
-        bin|.git|.claude-plugin) continue ;;
-      esac
-      if [ -f "$dir/SKILL.md" ]; then
-        install_skill "$name" "$dir"
-      fi
+install_to_target() {
+  local target="$1"
+  local dest="${TARGETS[$target]}"
+  echo "  Target: $dest"
+
+  if [ ${#ARGS[@]} -eq 0 ]; then
+    # Install all skills
+    for base in "${SKILL_SOURCES[@]}"; do
+      [ -d "$base" ] || continue
+      for dir in "$base"/*/; do
+        [ -d "$dir" ] || continue
+        name="$(basename "$dir")"
+        case "$name" in
+          .git|.claude-plugin) continue ;;
+        esac
+        if [ -f "$dir/SKILL.md" ]; then
+          install_skill_to "$name" "$dir" "$dest/$name" "$target"
+        fi
+      done
     done
-  done
-else
-  for name in "$@"; do
-    # Try skills/ first, then root
-    if [ -d "$REPO_DIR/skills/$name" ]; then
-      install_skill "$name" "$REPO_DIR/skills/$name"
-    elif [ -d "$REPO_DIR/$name" ]; then
-      install_skill "$name" "$REPO_DIR/$name"
-    else
-      echo "Error: skill '$name' not found" >&2
-      exit 1
-    fi
-  done
-fi
+  else
+    # Install specific skills
+    for name in "${ARGS[@]}"; do
+      src="$(find_skill_src "$name")"
+      if [ -z "$src" ]; then
+        echo "  [$target] Error: skill '$name' not found" >&2
+        continue
+      fi
+      install_skill_to "$name" "$src" "$dest/$name" "$target"
+    done
+  fi
+}
+
+echo "Installing skills..."
+for target in "${ACTIVE_TARGETS[@]}"; do
+  install_to_target "$target"
+done
 
 echo ""
-echo "Done. Restart Claude Code or start a new session to use them."
+echo "Done. Restart your editor to use the skills."

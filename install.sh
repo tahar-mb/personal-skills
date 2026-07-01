@@ -3,17 +3,39 @@
 # install.sh — Remote installer for personal-skills
 #
 # One-liner:
-#   curl -fsSL https://raw.githubusercontent.com/<user>/<repo>/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install.sh | bash
+#
+# With target flags:
+#   curl -fsSL ...install.sh | bash -s -- --cursor
 #
 # Custom repo:
-#   curl -fsSL ...install.sh | bash -s -- https://github.com/<user>/<repo>
+#   curl -fsSL ...install.sh | bash -s -- https://github.com/user/repo
 # ============================================================
 set -euo pipefail
 
-REPO_URL="${1:-https://github.com/tahar-mb/personal-skills}"
-SKILLS_DIR="$HOME/.claude/skills"
-TMP_DIR=$(mktemp -d)
+# --- Parse args ---
+POSITIONAL=()
+TARGET_FLAGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --claude|--hermes|--cursor) TARGET_FLAGS+=("${arg#--}") ;;
+    *) POSITIONAL+=("$arg") ;;
+  esac
+done
 
+REPO_URL="${POSITIONAL[0]:-https://github.com/tahar-mb/personal-skills}"
+
+# Default: all targets
+if [ ${#TARGET_FLAGS[@]} -eq 0 ]; then
+  TARGET_FLAGS=("claude" "hermes" "cursor")
+fi
+
+declare -A TARGET_DIRS
+TARGET_DIRS["claude"]="$HOME/.claude/skills"
+TARGET_DIRS["hermes"]="$HOME/.hermes/skills"
+TARGET_DIRS["cursor"]="$HOME/.cursor/skills"
+
+TMP_DIR=$(mktemp -d)
 cleanup() { rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
 
@@ -33,33 +55,46 @@ curl -fsSL "$ARCHIVE_URL" | tar xz -C "$TMP_DIR"
 EXTRACTED_DIR="$TMP_DIR/$REPO-main"
 [ -d "$EXTRACTED_DIR" ] || { echo "Error: failed to extract archive" >&2; exit 1; }
 
-mkdir -p "$SKILLS_DIR"
+install_skill_to() {
+  local name="$1"
+  local src="$2"
+  local dst="$3"
+  local label="$4"
 
-# Look in skills/ first, then root
-installed=0
-for base in "$EXTRACTED_DIR/skills" "$EXTRACTED_DIR"; do
-  [ -d "$base" ] || continue
-  for dir in "$base"/*/; do
-    [ -d "$dir" ] || continue
-    name="$(basename "$dir")"
-    case "$name" in
-      bin|.git|.claude-plugin) continue ;;
-    esac
-    if [ -f "$dir/SKILL.md" ]; then
-      dst="$SKILLS_DIR/$name"
-      rm -rf "$dst"
-      cp -R "$dir" "$dst"
-      echo "$REPO_URL" > "$dst/.installed-from"
-      echo "  Installed $name"
-      ((installed++))
-    fi
+  mkdir -p "$(dirname "$dst")"
+  rm -rf "$dst"
+  cp -R "$src" "$dst"
+  echo "$REPO_URL" > "$dst/.installed-from"
+  echo "  [$label] Installed $name"
+}
+
+for target in "${TARGET_FLAGS[@]}"; do
+  dest="${TARGET_DIRS[$target]:-}"
+  [ -n "$dest" ] || continue
+  echo "Installing to $dest ..."
+
+  installed=0
+  for base in "$EXTRACTED_DIR/skills" "$EXTRACTED_DIR"; do
+    [ -d "$base" ] || continue
+    for dir in "$base"/*/; do
+      [ -d "$dir" ] || continue
+      name="$(basename "$dir")"
+      case "$name" in
+        .git|.claude-plugin) continue ;;
+      esac
+      if [ -f "$dir/SKILL.md" ]; then
+        install_skill_to "$name" "$dir" "$dest/$name" "$target"
+        ((installed++))
+      fi
+    done
   done
+
+  if [ $installed -eq 0 ]; then
+    echo "  No skills found."
+  else
+    echo "  $installed skill(s) installed."
+  fi
 done
 
-if [ $installed -eq 0 ]; then
-  echo "No skills found."
-else
-  echo ""
-  echo "Done. $installed skill(s) installed to $SKILLS_DIR"
-  echo "Restart Claude Code or start a new session to use them."
-fi
+echo ""
+echo "Done. Restart your editor to use the skills."
