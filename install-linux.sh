@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================
-# install-linux.sh — Linux-optimized installer
+# install-linux.sh — Linux installer
 #
 # One-liner:
 #   curl -fsSL https://raw.githubusercontent.com/tahar-mb/personal-skills/main/install-linux.sh | bash
@@ -10,24 +10,23 @@
 # ============================================================
 set -euo pipefail
 
-# Linux ships bash 4+ — associative arrays and other modern features are safe.
-
 REPO_URL="https://github.com/tahar-mb/personal-skills"
-declare -A TARGET_DIRS=(
-  [claude]="$HOME/.claude/skills"
-  [hermes]="$HOME/.hermes/skills"
-  [cursor]="$HOME/.cursor/skills"
-)
-TARGET_ORDER=(claude hermes cursor)
-ACTIVE_TARGETS=()
 
+target_dir() {
+  case "$1" in
+    claude) echo "$HOME/.claude/skills" ;;
+    hermes) echo "$HOME/.hermes/skills" ;;
+    cursor) echo "$HOME/.cursor/skills" ;;
+  esac
+}
+
+ACTIVE_TARGETS=()
 for arg in "$@"; do
   case "$arg" in
     --claude|--hermes|--cursor) ACTIVE_TARGETS+=("${arg#--}") ;;
   esac
 done
-
-[ ${#ACTIVE_TARGETS[@]} -eq 0 ] && ACTIVE_TARGETS=("${TARGET_ORDER[@]}")
+[ ${#ACTIVE_TARGETS[@]} -eq 0 ] && ACTIVE_TARGETS=(claude hermes cursor)
 
 TMP_DIR="$(mktemp -d)"
 cleanup() { rm -rf "$TMP_DIR"; }
@@ -49,7 +48,7 @@ install_skill_to() {
 }
 
 for target in "${ACTIVE_TARGETS[@]}"; do
-  dest="${TARGET_DIRS[$target]}"
+  dest="$(target_dir "$target")"
   echo "Installing to $dest ..."
   installed=0
   for base in "$EXTRACTED_DIR/skills" "$EXTRACTED_DIR"; do
